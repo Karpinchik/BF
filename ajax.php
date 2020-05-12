@@ -1,10 +1,10 @@
 <?php
 require 'db_data.php';
 
-$cost_min = intval($_POST['cost_min']);
-$cost_max = intval($_POST['cost_max']);
+$cost_min = intval(strip_tags($_POST['cost_min']));
+$cost_max = intval(strip_tags($_POST['cost_max']));
 $type_cost = $_POST['type_cost'];
-$items = intval($_POST['items']);
+$items = intval(strip_tags($_POST['items']));
 $more_or_less = $_POST['more_or_less'];
 
 $opt = [
@@ -45,7 +45,7 @@ if(!empty($_POST['cost_min']) and !empty($_POST['cost_max']) and !empty($_POST['
             $data_for_table[] = $result;
         }
     }
-}
+} else $data_for_table[] = 'вы не ввели сумму или колличество';
 
 if(count($data_for_table) !== 0 ) {
     echo json_encode($data_for_table);

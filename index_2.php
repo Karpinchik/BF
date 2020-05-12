@@ -37,7 +37,7 @@
 
       <!-- Unnamed (Text Field) -->
       <div id="u3">
-        <input id="u3_input" type="text" >
+        <input id="u3_input" type="number" >
       </div>
 
       <!-- Unnamed (Rectangle) -->
@@ -49,7 +49,7 @@
 
       <!-- Unnamed (Text Field) -->
       <div id="u5" class="ax_default text_field">
-        <input id="u5_input" type="text" >
+        <input id="u5_input" type="number" >
       </div>
 
       <!-- Unnamed (Rectangle) -->
@@ -78,7 +78,7 @@
 
       <!-- Unnamed (Text Field) -->
       <div id="u9" class="ax_default text_field">
-        <input id="u9_input" type="text">
+        <input id="u9_input" type="number">
       </div>
 
       <!-- Unnamed (Rectangle) -->
