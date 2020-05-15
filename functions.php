@@ -10,43 +10,54 @@ $opt = [
 ];
 $pdo = new PDO($dsn, $user, $password, $opt);
 
-function getLastId()    // получаю последний id в бд
-{
-    global $pdo;
+//function getLastId()    // получаю последний id в бд
+//{
+//    global $pdo;
+//
+//    $stmt = $pdo->query("SELECT MAX(id) FROM price");
+//    $id_max_inDB = $stmt->fetch();
+//    return $id_max_inDB['MAX(id)'] ? $id_max_inDB['MAX(id)'] : 1;
+//}
 
-    $stmt = $pdo->query("SELECT MAX(id) FROM price");
-    $id_max_inDB = $stmt->fetch();
-    return $id_max_inDB['MAX(id)'] ? $id_max_inDB['MAX(id)'] : 1;
-}
-
-$counter = getLastId();             // получаю из базы последний id
+//$counter = getLastId();             // получаю из базы последний id
 
 function parsData()
 {
     global $excel;
-    global $hat;
+
     global $pdo;
-    global $counter;
+//    global $counter;
 
     foreach ($excel->getWorksheetIterator() as $worksheet) {
         $lists[] = $worksheet->toArray();        // массив распарсенных строк из файла
     }
 
-    array_shift($lists[0]);    // удалил первый массив с названиями колонок
+//    array_shift($lists[0]);    // удалил первый массив с названиями колонок
+//    foreach ($lists[0] as $list) {           // пробегаем по всем записям и записываем в базу с корректировками цены
+//        $sql = "INSERT INTO price(id, name, cost, cost_all, warehouse1, warehouse2, country, notes) VALUES (:id, :name, :cost, :cost_all, :warehouse1, :warehouse2, :country, :notes)";
+//        $stmt = $pdo->prepare($sql);
+//
+//        $params = [':id' => $counter, ':name' => $list[0], ':cost' => floatval($list[1]), ':cost_all' => intval($list[2]), ':warehouse1' => $list[3], ':warehouse2' => $list[4], ':country' => $list[5], ':notes'=>''];
+//        $stmt->execute($params);
+//        $counter++;
+//    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        array_shift($lists[0]);    // удалил первый массив с названиями колонок
     foreach ($lists[0] as $list) {           // пробегаем по всем записям и записываем в базу с корректировками цены
-        $sql = "INSERT INTO price(id, name, cost, cost_all, warehouse1, warehouse2, country, notes) VALUES (:id, :name, :cost, :cost_all, :warehouse1, :warehouse2, :country, :notes)";
+        $sql = "INSERT INTO price(name, cost, cost_all, warehouse1, warehouse2, country, notes) VALUES (:name, :cost, :cost_all, :warehouse1, :warehouse2, :country, :notes)";
         $stmt = $pdo->prepare($sql);
 
-        $params = [':id' => $counter, ':name' => $list[0], ':cost' => floatval($list[1]), ':cost_all' => intval($list[2]), ':warehouse1' => $list[3], ':warehouse2' => $list[4], ':country' => $list[5], ':notes'=>''];
+        $params = [':name' => $list[0], ':cost' => floatval($list[1]), ':cost_all' => intval($list[2]), ':warehouse1' => $list[3], ':warehouse2' => $list[4], ':country' => $list[5], ':notes'=>''];
         $stmt->execute($params);
-        $counter++;
+
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 
 function getDataDB(){            // получаю все данные из базы
     global $pdo;
-    global $hat;
     $stmt = $pdo->query('SELECT * FROM price');
     $data_for_table=[];
 
@@ -60,14 +71,23 @@ function getDataDB(){            // получаю все данные из ба
             $cost_all_min[] = $value['cost_all'];
         }
     }
-
+///////////
+    foreach ($data_for_table as $kay=>&$value){
+        if($value['warehouse1'] < 20 or $value['warehouse2'] < 20 ) {
+            $value['notes'] = "Осталось мало!! Срочно докупите!!!";
+        }
+    }
+///////////
     $cost_max = max($cost_max);
     $cost_all_min = min($cost_all_min);
+
+
 
     echo '<table border="1">';                  // вся таблица
         foreach ($data_for_table as $row) {
             echo '<tr data-attr-tr=' . $row['id'] . '>';
                 foreach($row as $item=>$col){
+
                     if($row['cost'] === $cost_max) {
                         echo '<td style="background-color: red" data-' . $item . ' =' . $col . '>' . $col . '</td>';
                     } else if($row['cost_all'] === $cost_all_min) {
@@ -115,13 +135,16 @@ function getDataDB(){            // получаю все данные из ба
     echo '</br>';
 
     // Вывести под таблицей среднюю стоимость розничной цены товара
-    echo 'Средняя стоимость розничной цены: ' . array_sum($cost_avg)/sizeof($cost_avg) . '</br>';
+    echo 'Средняя стоимость розничной цены: ' . round(array_sum($cost_avg)/sizeof($cost_avg), 2) . '</br>';
 
     // Вывести под таблицей среднюю стоимость оптовой цены товара
     echo 'Средняя стоимость розничной цены: ' . intval(array_sum($cost_all_avg)/sizeof($cost_all_avg)) . '</br>';
     echo '</br>';
 
 }
+
+
+
 
 
 
